@@ -17,12 +17,22 @@ const Home = () => {
   // Function to parse stored interview data
   const parseInterviews = (interviews) => {
     return interviews.map((interview, index) => {
-      const startDateTime = new Date(`${interview.date}T${interview.startTime}:00`);
-      const endDateTime = new Date(`${interview.date}T${interview.endTime}:00`);
+      const startDateTime = new Date(interview.date);
+      const endDateTime = new Date(interview.date);
+
+      // Add start and end time adjustments
+      const [startHours, startMinutes] = interview.startTime.split(":");
+      const [endHours, endMinutes] = interview.endTime.split(":");
+
+      startDateTime.setHours(startHours);
+      startDateTime.setMinutes(startMinutes);
+      
+      endDateTime.setHours(endHours);
+      endDateTime.setMinutes(endMinutes);
 
       return {
         id: index + 1,
-        title: `${interview.candidate} with ${interview.interviewer} (${interview.type})`,
+        title: `${interview.candidate} with ${interview.interviewer} (${interview.type})`, // Title set here
         start: startDateTime,
         end: endDateTime,
         candidate: interview.candidate,
@@ -44,7 +54,15 @@ const Home = () => {
 
   // Update localStorage whenever events change
   useEffect(() => {
-    const storedInterviews = JSON.parse(localStorage.getItem("interviews")) || [];
+    const storedInterviews = events.map(event => ({
+      candidate: event.candidate,
+      email: event.email,
+      interviewer: event.interviewer,
+      type: event.type,
+      date: event.date,
+      startTime: event.startTime,
+      endTime: event.endTime,
+    }));
     localStorage.setItem("interviews", JSON.stringify(storedInterviews));
   }, [events]);
 
@@ -104,9 +122,8 @@ const Home = () => {
             <p><strong>Interviewer:</strong> {selectedEvent.interviewer}</p>
             <p><strong>Interview Type:</strong> {selectedEvent.type}</p>
             <p><strong>Email:</strong> {selectedEvent.email}</p>
-            <p><strong>Date:</strong> {selectedEvent.date}</p>
+            <p><strong>Date:</strong> {new Date(selectedEvent.date).toLocaleDateString()}</p>
             <p><strong>Time:</strong> {selectedEvent.startTime} - {selectedEvent.endTime}</p>
-            
           </div>
         </div>
       )}
